@@ -23,11 +23,18 @@ util.inherits(Driver, EventEmitter);
 var fakeNodes = [
   {
     remote16 : 0x1234,
-    deviceId : 'Node 1'
+    deviceId : 'Light 1',
+    services : ['light']
+  },
+  {
+    remote16 : 0x1224,
+    deviceId : 'Light 2',
+    services : ['light']
   },
   {
     remote16 : 0x1235,
-    deviceId : 'Node 2'
+    deviceId : 'Switch 1',
+    services : ['switch']
   }
 ];
 
@@ -54,8 +61,10 @@ Driver.prototype.open = function(callback){
       self.ready = true;
 
     callback(err);
-    setTimeout(self._emitFakeAssoc.bind(self,0),500);
-    setTimeout(self._emitFakeAssoc.bind(self,1),2500);
+
+    for(var i=0;i<fakeNodes.length;i++){
+      setTimeout(self._emitFakeAssoc.bind(self,i),500*(i+1) );
+    }
   });
 };
 
@@ -67,6 +76,7 @@ function checkNode(address){
 }
 
 Driver.prototype.write = function(address,packet,callback){
+  console.log('Xbee Driver: Write ('+address+') - ' + JSON.stringify(packet));
   if(!checkNode(address))
     setTimeout(callback.bind(null,new Error('No Acknowledgement')),40);
   else
